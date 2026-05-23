@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas - URL Shortener</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        input {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .stats-card.show {
+            display: block;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stat-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .url-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .url-info a {
+            color: #667eea;
+            word-break: break-all;
+        }
+
+        .daily-stats {
+            margin-top: 20px;
+        }
+
+        .daily-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .daily-date {
+            color: #555;
+        }
+
+        .daily-visits {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            margin-top: 20px;
+        }
+
+        .total-visits {
+            font-size: 36px;
+            color: #667eea;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        h3 {
+            margin: 20px 0 10px 0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Estadísticas de URLs</h1>
+            <p class="subtitle">Consulta el rendimiento de tus enlaces acortados</p>
+
+            <div class="search-box">
+                <input type="text" id="codeInput" placeholder="Ingresa el código de la URL (ej: aBc123)">
+                <button onclick="getStats()">🔍 Ver Estadísticas</button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Cargando estadísticas...</p>
+            </div>
+
+            <div class="error" id="error"></div>
+
+            <div class="stats-card" id="statsCard">
+                <h3>stadísticas del Enlace</h3>
+                <div class="url-info" id="urlInfo"></div>
+
+                <div class="stat-item">
+                    <span class="stat-label">Código:</span>
+                    <span class="stat-value" id="shortCode"></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Fecha de creación:</span>
+                    <span class="stat-value" id="createdAt"></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label"> Total de visitas:</span>
+                    <span class="stat-value" id="totalVisits"></span>
+                </div>
+
+                <div class="daily-stats" id="dailyStats">
+                    <h3>Visitas por día</h3>
+                    <div id="dailyList"></div>
+                </div>
+
+                <a href="#" class="back-link" onclick="history.back()">← Volver</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        const STATS_API_ID = 'bnf37szbqj';
+
+        async function getStats() {
+            const code = document.getElementById('codeInput').value.trim();
+            if (!code) {
+                showError('Por favor ingresa un código');
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('statsCard').classList.remove('show');
+            document.getElementById('error').style.display = 'none';
+
+            const url = `http://localhost:4566/restapis/${STATS_API_ID}/dev/stats/${code}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayStats(data);
+                } else {
+                    showError(data.error || 'No se encontraron estadísticas para este código');
+                }
+            } catch (error) {
+                showError('Error de conexión: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function displayStats(data) {
+            document.getElementById('shortCode').textContent = data.short_code;
+            document.getElementById('createdAt').textContent = new Date(data.created_at).toLocaleString();
+            document.getElementById('totalVisits').textContent = data.total_visits;
+
+            const urlInfo = `<strong>URL original:</strong> <a href="${data.original_url}" target="_blank">${data.original_url}</a>`;
+            document.getElementById('urlInfo').innerHTML = urlInfo;
+
+            const dailyList = document.getElementById('dailyList');
+            dailyList.innerHTML = '';
+
+            if (data.daily_stats && Object.keys(data.daily_stats).length > 0) {
+                const sortedDates = Object.keys(data.daily_stats).sort().reverse();
+                sortedDates.forEach(date => {
+                    const div = document.createElement('div');
+                    div.className = 'daily-item';
+                    div.innerHTML = `
+                        <span class="daily-date">${date}</span>
+                        <span class="daily-visits">${data.daily_stats[date]} visitas</span>
+                    `;
+                    dailyList.appendChild(div);
+                });
+            } else {
+                dailyList.innerHTML = '<p>No hay estadísticas diarias disponibles aún</p>';
+            }
+
+            document.getElementById('statsCard').classList.add('show');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        document.getElementById('codeInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                getStats();
+            }
+        });
+    </script>
+</body>
+</html>

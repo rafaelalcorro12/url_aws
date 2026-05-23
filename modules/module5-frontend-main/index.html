@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .short-url {
+            color: #667eea;
+            word-break: break-all;
+            margin: 10px 0;
+            font-size: 18px;
+        }
+
+        .copy-btn {
+            background: #28a745;
+            margin-top: 10px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .stats-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .stats-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 URL Shortener</h1>
+        <p class="subtitle">Acorta tus URLs de forma rápida y sencilla</p>
+
+        <input type="url" id="urlInput" placeholder="https://ejemplo.com/mi-url-larga" required>
+        <button onclick="shortenUrl()">✨ Acortar URL</button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Generando URL corta...</p>
+        </div>
+
+        <div class="result" id="result">
+            <strong>URL Acortada:</strong>
+            <div class="short-url" id="shortUrl"></div>
+            <button class="copy-btn" onclick="copyToClipboard()">Copiar</button>
+            <div class="stats-link" id="statsLink"></div>
+        </div>
+
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        const API_ID = 'jcyfeg7ali';
+        const API_URL = `http://localhost:4566/restapis/${API_ID}/dev/_user_request_/shorten`;
+        const STATS_API_ID = 'bnf37szbqj'; // Reemplazar con el ID del módulo 3 después
+
+        async function shortenUrl() {
+            const url = document.getElementById('urlInput').value;
+            if (!url) {
+                showError('Por favor ingresa una URL');
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('error').style.display = 'none';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const shortUrl = `http://localhost:4566/restapis/xavywnah7k/dev/${data.short_code}`;
+                    document.getElementById('shortUrl').innerHTML = `<a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
+                    document.getElementById('statsLink').innerHTML = `<a href="http://localhost:4566/restapis/${STATS_API_ID}/dev/stats/${data.short_code}" target="_blank">📊 Ver estadísticas</a>`;
+                    document.getElementById('result').classList.add('show');
+                } else {
+                    showError(data.error || 'Error al acortar la URL');
+                }
+            } catch (error) {
+                showError('Error de conexión: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function copyToClipboard() {
+            const shortUrl = document.getElementById('shortUrl').innerText;
+            navigator.clipboard.writeText(shortUrl);
+            alert('¡URL copiada al portapapeles!');
+        }
+    </script>
+</body>
+</html>
