@@ -1,0 +1,106 @@
+# Binarios y builds
+bootstrap
+function.zip
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go
+vendor/
+*.mod
+*.sum
+*.work
+go.work
+go.work.sum
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+*.backup
+terraform.tfstate.backup
+
+# LocalStack
+localstack-data/
+*.log
+*.pid
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Logs
+*.log
+logs/
+_.log_
+output.txt
+output.json
+*.json.tmp
+
+# Env
+.env
+.env.local
+.env.*.local
+*.env
+
+# AWS credentials
+.aws/
+credentials
+config
+
+# Testing
+*.test
+coverage.out
+coverage.html
+
+# Temp
+tmp/
+temp/
+*.tmp
+*.temp
+
+# ZIPs
+*.zip
+*.tar.gz
+*.tar
+
+# LocalStack volume
+localstack-data/
+
+# Outputs
+output.txt
+output.json
+payload.json
